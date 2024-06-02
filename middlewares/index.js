@@ -1,4 +1,4 @@
-const isValidId = require('./isValidId');
+const { isValidId } = require('./isValidId');
 const upload = require('./upload');
 const isEmptyField = require('./isEmptyField');
 

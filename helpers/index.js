@@ -1,5 +1,4 @@
-const HttpError = require('./HttpError');
-const resizeImage = require('./resizeImage')
+const { HttpError } = require('./HttpError');
 
 const validateBody = (schema) => {
     const func = (req, _, next) => {
@@ -14,6 +13,5 @@ const validateBody = (schema) => {
 
 module.exports = {
     HttpError,
-    resizeImage,
     validateBody
 }
