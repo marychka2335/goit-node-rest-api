@@ -1,13 +1,8 @@
 const User = require("../models/user");
-const { HttpError, resizeImage } = require("../helpers");
+const { HttpError } = require("../helpers/HttpError");
 const schemas = require("../schemas");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const { updateUserSchema } = require("../schemas");
-const gravatar = require("gravatar");
-const path = require("path");
-const fs = require("fs/promises");
-require("dotenv").config();
+const path = require('path');
 
 const { SECRET_KEY } = process.env;
 
@@ -19,19 +14,15 @@ const register = async (req, res, next) => {
     if (error) {
       throw HttpError(400, error.message);
     }
-    const { email, password } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
 
     if (user) {
       throw HttpError(409, "Email in use");
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
-    const avatarURL = gravatar.url(email);
     const newUser = await User.create({
       ...req.body,
-      password: hashPassword,
-      avatarURL,
     });
     res.status(201).json({
       user: {
@@ -46,16 +37,11 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
-      throw HttpError(401, "Email or password is wrong");
-    }
-
-    const passwordCompare = await bcrypt.compare(password, user.password);
-    if (!passwordCompare) {
-      throw HttpError(401, "Email or password is wrong");
+      throw HttpError(401, "Email is not authorized");
     }
 
     const payload = {
@@ -100,7 +86,7 @@ const updateUserSub = async (req, res, next) => {
     const { _id } = req.user;
     const { error } = updateUserSchema.validate(req.body);
     if (error) {
-      throw HttpError(400, error.message);
+      throw HttpError(400, 'error.message');
     }
     const result = await User.findByIdAndUpdate(_id, req.body, { new: true });
     if (!result) {
@@ -115,11 +101,10 @@ const updateUserSub = async (req, res, next) => {
 const updateAvatar = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const { path: tmpUpload, originalname } = req.file;
+    const { path:  originalname } = req.file;
     const filename = `${_id}_${originalname}`;
     const resultUpload = path.join(avatarDir, filename);
-    await resizeImage(tmpUpload);
-    await fs.rename(tmpUpload, resultUpload);
+    await fs.rename(resultUpload);
     const avatarURL = path.join("avatars", filename);
     await User.findByIdAndUpdate(_id, { avatarURL });
     res.status(200).json({

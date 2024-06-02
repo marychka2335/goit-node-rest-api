@@ -1,5 +1,4 @@
-const { Schema, model } = require('mongoose');
-const { handleMongooseError } = require('../helpers');
+const { HttpError } = require("../helpers/HttpError");
 
 const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
@@ -24,7 +23,7 @@ const userSchema = new Schema ({
   avatarURL: String,
 }, {versionKey: false})
 
-userSchema.post('save', handleMongooseError)
+userSchema.post('save', HttpError)
 
 const User = model('user', userSchema)
 

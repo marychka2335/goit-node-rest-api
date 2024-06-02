@@ -1,18 +1,21 @@
 const express = require('express');
 const controllers = require('../../controllers');
-const { isValidId, authenticate } = require('../../middlewares');
+const { isValidId } = require('../../middlewares');
+const { isEmptyField } = reqire('../../middlewares/isEmptyField.js');
+const { validateBody } = require('../../helpers/index.js');
+const { addSchema, updateSchema} = require('../../schemas/addSchema')
 const router = express.Router();
 
-router.get('/', authenticate, controllers.getListContacts)
+router.get('/', controllers.getListContacts)
 
-router.get('/:contactId', authenticate, isValidId, controllers.getContactByID)
+router.get('/:contactId', isValidId, controllers.getContactByID)
 
-router.post('/', authenticate, controllers.addNewContact)
+router.post('/', isValidId, isEmptyField, validateBody(addSchema), controllers.addNewContact)
 
-router.delete('/:contactId', authenticate, isValidId, controllers.deleteContact)
+router.delete('/:contactId', isValidId, controllers.deleteContact)
 
-router.put('/:contactId', authenticate, isValidId, controllers.changeContact)
+router.put('/:contactId', isValidId, isEmptyField, validateBody(updateSchema), controllers.changeContact)
 
-router.patch('/:contactId/favorite', authenticate, controllers.updateStatusContact)
+router.patch('/:contactId/favorite', controllers.updateStatusContact)
 
 module.exports = router
