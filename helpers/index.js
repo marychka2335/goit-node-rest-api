@@ -1,6 +1,8 @@
 const { HttpError } = require('./HttpError');
+const {handleMongooseError} = require('./handleMongooseError');
+const resizeImage = require('./resizeImage')
 
-const validateBody = (schema) => {
+const {validateBody} = (schema) => {
     const func = (req, _, next) => {
         const { error } = schema.validate(req.body);
         if (error) {
@@ -13,5 +15,7 @@ const validateBody = (schema) => {
 
 module.exports = {
     HttpError,
-    validateBody
+    validateBody,
+    handleMongooseError,
+    resizeImage
 }
