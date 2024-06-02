@@ -1,13 +1,15 @@
 const express = require('express');
 const controllers = require('../../controllers');
-const { upload } = require('../../middlewares');
+const { isEmptyField } = reqire('../../middlewares/isEmptyField.js');
+const { validateBody } = require('../../helpers/index.js');
+const { authenticate, upload } = require('../../middlewares');
 const router = express.Router();
 
-router.post('/register', controllers.register);
-router.post('/login', controllers.login);
-router.get('/current', controllers.getCurrent);
-router.post('/logout', controllers.logout);
-router.patch('/', controllers.updateUserSub),
-router.patch('/avatars', upload.single('avatar'), controllers.updateAvatar)
+router.post('/register', isEmptyField, validateBody(userSchema), controllers.register);
+router.post('/login', isEmptyField, validateBody(userSchema),controllers.login);
+router.get('/current', authenticate, controllers.getCurrent);
+router.post('/logout', authenticate, controllers.logout);
+router.patch('/', authenticate, isEmptyField, validateBody(updateUserSchema), controllers.updateUserSub),
+router.patch('/avatars', authenticate, upload.single('avatar'), controllers.updateAvatar)
 
 module.exports = router
