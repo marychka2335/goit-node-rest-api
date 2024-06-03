@@ -1,7 +1,6 @@
 const express = require('express');
 const controllers = require('../../controllers');
 const { authenticate } = require('../../middlewares');
-const { isEmptyField } = reqire('../../middlewares/isEmptyField.js');
 const { validateBody } = require('../../helpers/index.js');
 const { userSchema } = require('../../schemas/userSchema');
 const { updateUserSchema } = require('../../schemas/updateUserSchema')
@@ -10,11 +9,12 @@ const { updateUserSchema } = require('../../schemas/updateUserSchema')
 const router = express.Router();
 
 
-router.post('/register', isEmptyField, validateBody(userSchema), controllers.register);
-router.post('/login', controllers.login);
+router.post('/register',  validateBody(userSchema), controllers.register);
+router.post('/login',  validateBody(userSchema),controllers.login);
 router.get('/current', authenticate, controllers.getCurrent);
-router.post('/logout', authenticate, isEmptyField, validateBody(updateUserSchema), controllers.logout);
-router.patch('/', authenticate, controllers.updateUser)
+router.post('/logout', authenticate, controllers.logout);
+router.patch('/', authenticate, validateBody(updateUserSchema), controllers.updateUserSub),
+router.patch('/avatars', authenticate, upload.single('avatar'), controllers.updateAvatar)
 
 
 module.exports = router
