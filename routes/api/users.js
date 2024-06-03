@@ -3,6 +3,9 @@ const controllers = require('../../controllers');
 const { isEmptyField } = reqire('../../middlewares/isEmptyField.js');
 const { validateBody } = require('../../helpers/index.js');
 const { authenticate, upload } = require('../../middlewares');
+const { validateBody } = require('../../helpers/index.js');
+const { userSchema } = require('../../schemas/userSchema');
+const { updateUserSchema } = require('../../schemas/updateUserSchema')
 const router = express.Router();
 
 router.post('/register', isEmptyField, validateBody(userSchema), controllers.register);
