@@ -2,7 +2,6 @@ const express = require('express');
 const controllers = require('../../controllers');
 const { validateBody } = require('../../helpers/index.js');
 const { authenticate, upload } = require('../../middlewares');
-const { validateBody } = require('../../helpers/index.js');
 const { userSchema } = require('../../schemas/userSchema');
 const { updateUserSchema } = require('../../schemas/updateUserSchema')
 const router = express.Router();
