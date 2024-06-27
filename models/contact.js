@@ -1,11 +1,11 @@
-const { Schema, model } = require('mongoose');
-const {handleMongooseError} = require('../helpers')
+import { Schema, model } from "mongoose";
+import { handleSaveError, setUpdateSetings } from "./hooks.js";
 
 const contactSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, 'Set name for contact'],
+      required: [true, "Set name for contact"],
     },
     email: {
       type: String,
@@ -21,8 +21,11 @@ const contactSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
-contactSchema.post('save', handleMongooseError)
+contactSchema.pre("findOneAndUpdate", setUpdateSetings);
+contactSchema.post("findOneAndUpdate", handleSaveError);
 
-const Contact = model('contact', contactSchema)
+contactSchema.post("save", handleSaveError);
 
-module.exports = Contact
+const Contact = model("contact", contactSchema);
+
+export default Contact;

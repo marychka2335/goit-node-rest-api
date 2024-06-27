@@ -1,98 +1,64 @@
-const Contact = require('../models/contact');
-const { HttpError } = require('../helpers');
-const schemas = require('../schemas');
+import * as contactsService from "../services/contactsServices.js";
+import HttpError from "../helpers/HttpError.js";
+import controllerWrapper from "../decorators/controllerWrapper.js";
 
-const getListContacts = async (req, res, next) => {
-  try {
-    const result = await Contact.find();
-    res.status(200).json(result)
-  } catch (error) {
-    next(error)
+const getAllContacts = async (req, res) => {
+  const contacts = await contactsService.listContacts();
+
+  res.json(contacts);
+};
+
+const getOneContact = async (req, res) => {
+  const { contactId } = req.params;
+  const contact = await contactsService.getContactById(contactId);
+
+  if (!contact) {
+    throw HttpError(404);
   }
-}
+  res.json(contact);
+};
 
-const getContactByID = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const result = await Contact.findById(contactId);
-    if (!result) {
-      throw HttpError(404, 'Not Found')
-    }
-    res.status(200).json(result);
-  } catch (error) {
-    next(error)
+const deleteContact = async (req, res) => {
+  const { contactId } = req.params;
+  const contact = await contactsService.removeContact(contactId);
+
+  if (!contact) {
+    throw HttpError(404);
   }
-} 
+  res.json(contact);
+};
 
-const addNewContact = async (req, res, next) => {
-  try {
-    const newContact = req.body;
-    const { error } = schemas.addSchema.validate(newContact);
-    if (error) {
-      console.log(error)
-      throw HttpError(400, error.message)
-    }
-    const result = await Contact.create(newContact);
-    res.status(201).json(result)
-  } catch (error) {
-    next(error)
+const createContact = async (req, res) => {
+  const contact = await contactsService.addContact(req.body);
+
+  res.status(201).json(contact);
+};
+
+const updateContact = async (req, res) => {
+  const { contactId } = req.params;
+  const contact = await contactsService.updateContactById(contactId, req.body);
+
+  if (!contact) {
+    throw HttpError(404);
   }
-}
+  res.json(contact);
+};
 
-const deleteContact = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const result = await Contact.findByIdAndDelete(contactId);
-     if (!result) {
-      throw HttpError(404, 'Not Found')
-    }
-    res.status(200).json({message: "contact deleted"})
-  } catch (error) {
-    next(error)
+const updateStatusContact = async (req, res) => {
+  const { contactId } = req.params;
+  const contact = await contactsService.updateContactById(contactId, req.body);
+
+  if (!contact) {
+    throw HttpError(404);
   }
-}
+  res.json(contact);
+};
 
-const changeContact = async (req, res, next) => {
-  try {
-      const { contactId } = req.params;
-    const updateContact = req.body;
-    const { error } = schemas.addSchema.validate(updateContact);
-    if (error) {
-      throw HttpError(400, error.message)
-    }
-    const result = await Contact.findByIdAndUpdate(contactId, updateContact, {new: true});
-    if (!result) {
-      throw HttpError(404, 'Not Found')
-    }
-    res.status(200).json(result)
-  } catch (error) {
-    next(error)
-  }
-}
-
-const updateStatusContact = async (req, res, next) => {
-  try {
-      const { contactId } = req.params;
-    const updateContact = req.body;
-    const { error } = schemas.updateFavoriteSchema.validate(updateContact);
-    if (error) {
-      throw HttpError(400, error.message)
-    }
-    const result = await Contact.findByIdAndUpdate(contactId, updateContact, {new: true});
-    if (!result) {
-      throw HttpError(404, 'Not Found')
-    }
-    res.status(200).json(result)
-  } catch (error) {
-    next(error)
-  }
-}
-
-module.exports = {
-    getListContacts,
-    getContactByID,
-    addNewContact,
-    deleteContact,
-    changeContact,
-    updateStatusContact
-}
+export default {
+  getAllContacts: controllerWrapper(getAllContacts),
+  getOneContact: controllerWrapper(getOneContact),
+  deleteContact: controllerWrapper(deleteContact),
+  createContact: controllerWrapper(createContact),
+  updateContact: controllerWrapper(updateContact),
+  updateStatusContact: controllerWrapper(updateStatusContact),
+};
