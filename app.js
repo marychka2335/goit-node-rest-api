@@ -1,37 +1,44 @@
-import express from "express";
-import morgan from "morgan";
-import cors from "cors";
-import mongoose from "mongoose";
-import "dotenv/config";
-import contactsRouter from "./routes/contactsRouter.js";
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import 'dotenv/config';
 
-const { DB_HOST, PORT = 3000 } = process.env;
+import contactsRouter from './routes/contactsRouter.js';
+
+const { DB_CONNECTION_STRING, PORT = 3002 } = process.env;
+
 const app = express();
 
-app.use(morgan("tiny"));
+app.use(morgan('tiny'));
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/contacts", contactsRouter);
+app.use('/api/contacts', contactsRouter);
 
 app.use((_, res) => {
-  res.status(404).json({ message: "Route not found" });
+  res.status(404).json({ message: 'Route not found' });
 });
 
 app.use((err, req, res, next) => {
-  const { status = 500, message = "Server error" } = err;
+  const { status = 500, message = 'Server error' } = err;
   res.status(status).json({ message });
 });
 
 mongoose
-  .connect(DB_HOST)
+  .connect(DB_CONNECTION_STRING)
   .then(() => {
+    console.log('Database connection successful');
     app.listen(PORT, () => {
-      console.log("Database connection successful");
-      console.log(`Server is running. Use API on port: ${PORT}`);
+      console.log(`Server is running. Use our API on port: ${PORT}`);
     });
   })
-  .catch((err) => {
-    console.log(err.message);
+  .catch(error => {
+    console.log(
+      'Could not connect to the mongodb database because of error',
+      error.message
+    );
     process.exit(1);
   });
+
+mongoose.set('debug', true);
