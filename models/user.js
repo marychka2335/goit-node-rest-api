@@ -1,3 +1,4 @@
+
 import { Schema, model } from "mongoose";
 import { handleSaveError, setUpdateSetings } from "./hooks.js";
 
@@ -18,6 +19,10 @@ const userSchema = new Schema(
       default: "starter",
     },
     token: {
+      type: String,
+      default: null,
+    },
+    avatarURL: {
       type: String,
       default: null,
     },

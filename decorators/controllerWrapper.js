@@ -1,15 +1,13 @@
-const messageList = {
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    409: "Conflict",
-}
+const controllerWrapper = (controller) => {
+  const fn = async (req, res, next) => {
+    try {
+      await controller(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-const HttpError = (status, message = messageList[status]) => {
-    const error = new Error(message);
-    error.status = status;
-    return error;
-}
+  return fn;
+};
 
-export default HttpError;
+export default controllerWrapper;
