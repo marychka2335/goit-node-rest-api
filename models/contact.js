@@ -1,10 +1,11 @@
-const { HttpError } = require('../helpers/HttpError');
+import { Schema, model } from "mongoose";
+import { handleSaveError, setUpdateSetings } from "./hooks.js";
 
 const contactSchema = new Schema(
-    {
+  {
     name: {
       type: String,
-      required: [true, 'Set name for contact'],
+      required: [true, "Set name for contact"],
     },
     email: {
       type: String,
@@ -15,17 +16,20 @@ const contactSchema = new Schema(
     favorite: {
       type: Boolean,
       default: false,
-        },
+    },
     owner: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
-    }
-  },   { versionKey: false, timestamps: true }
+      ref: "user",
+    },
+  },
+  { versionKey: false, timestamps: true }
+);
 
-)
+contactSchema.pre("findOneAndUpdate", setUpdateSetings);
+contactSchema.post("findOneAndUpdate", handleSaveError);
 
-contactSchema.post('save', HttpError)
+contactSchema.post("save", handleSaveError);
 
-const Contact = model('contact', contactSchema)
+const Contact = model("contact", contactSchema);
 
-module.exports = Contact
+export default Contact;
