@@ -30,9 +30,9 @@ app.use((err, req, res, next) => {
 
 
 mongoose
-.connect('mongodb+srv://marychka2335:HiVidahSW1MKDm4S@cluster0.a95orri.mongodb.net/db-contacts', {
+// .connect('mongodb+srv://marychka2335:HiVidahSW1MKDm4S@cluster0.a95orri.mongodb.net/db-contacts', {
   
-  // .connect(DB_HOST, {
+  .connect(DB_HOST, {
     usenewurlparser: true,
     useunifiedtopology: true,
   } )
