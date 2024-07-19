@@ -1,57 +1,61 @@
 import express from "express";
-import contactsControllers from "../controllers/contactsControllers.js";
 import isEmptyBody from "../middlewares/isEmptyBody.js";
-import isValidId from "../middlewares/isValidId.js";
 import validateBody from "../helpers/validateBody.js";
-import {
-  createContactSchema,
-  updateContactSchema,
-  updateContactStatusSchema,
-} from "../schemas/contactsSchemas.js";
 import authenticate from "../middlewares/authenticate.js";
+import {
+  userSigninSchema,
+  userSignupSchema,
+  userSubscriptionSchema,
+  userEmailSchema,
+} from "../schemas/usersSchemas.js";
+import usersControllers from "../controllers/usersControllers.js";
+import upload from "../middlewares/upload.js";
+import isFileExist from "../middlewares/isFileExist.js";
+import { PARAMS } from "../constants/constants.js";
 
-const contactsRouter = express.Router();
+const usersRouter = express.Router();
 
-contactsRouter.get("/", authenticate, contactsControllers.getAllContacts);
-
-contactsRouter.get(
-  "/:contactId",
-  authenticate,
-  isValidId,
-  contactsControllers.getOneContact
+usersRouter.post(
+  "/register",
+  isEmptyBody,
+  validateBody(userSignupSchema),
+  usersControllers.register
 );
 
-contactsRouter.delete(
-  "/:contactId",
-  authenticate,
-  isValidId,
-  contactsControllers.deleteContact
+usersRouter.post(
+  "/login",
+  isEmptyBody,
+  validateBody(userSigninSchema),
+  usersControllers.login
 );
 
-contactsRouter.post(
+usersRouter.get("/current", authenticate, usersControllers.getCurrent);
+
+usersRouter.get("/verify/:verificationToken", usersControllers.verify);
+
+usersRouter.post(
+  "/verify",
+  isEmptyBody,
+  validateBody(userEmailSchema),
+  usersControllers.verifyResend
+);
+
+usersRouter.post("/logout", authenticate, usersControllers.logout);
+
+usersRouter.patch(
   "/",
   authenticate,
   isEmptyBody,
-  validateBody(createContactSchema),
-  contactsControllers.createContact
+  validateBody(userSubscriptionSchema),
+  usersControllers.updateSubscription
 );
 
-contactsRouter.put(
-  "/:contactId",
+usersRouter.patch(
+  "/avatars",
   authenticate,
-  isValidId,
-  isEmptyBody,
-  validateBody(updateContactSchema),
-  contactsControllers.updateContact
+  upload.single(PARAMS.AVATAR_FILE),
+  isFileExist,
+  usersControllers.updateAvatar
 );
 
-contactsRouter.patch(
-  "/:contactId/favorite",
-  authenticate,
-  isValidId,
-  isEmptyBody,
-  validateBody(updateContactStatusSchema),
-  contactsControllers.updateStatusContact
-);
-
-export default contactsRouter;
+export default usersRouter;
