@@ -1,30 +1,31 @@
-const { HttpError } = require("../helpers/HttpError");
-const jwt = require('jsonwebtoken');
-const User = require("../models/user");
-
-const { SECRET_KEY } = process.env;
+import HttpError from "../helpers/HttpError.js";
+import { verifyToken } from "../helpers/jwt.js";
+import { findUser } from "../services/usersServices.js";
 
 const authenticate = async (req, res, next) => {
-    const { authorization = '' } = req.headers;
-    const [bearer, token] = authorization.split(' ');
-    if (bearer !== "Bearer" || !token) {
-        next(HttpError(401, "Not authorized"))
+  const { authorization } = req.headers;
+  if (!authorization) {
+    return next(HttpError(401, "Authorization header not found"));
+  }
+
+  const [bearer, token] = authorization.split(" ");
+  if (bearer !== "Bearer") {
+    return next(HttpError(401, "Bearer not found"));
+  }
+
+  try {
+    const { id } = verifyToken(token);
+    const user = await findUser({ _id: id });
+
+    if (user.token === null || user.token !== token) {
+      throw new Error();
     }
 
-    try {
-        const { id } = jwt.verify(token, SECRET_KEY);
-        const user = await User.findById(id);
+    req.user = user;
+    next();
+  } catch (error) {
+    return next(HttpError(401, "Not authorized"));
+  }
+};
 
-        if (!user || !user.token || user.token !== token) {
-            next(HttpError(401, "Not authorized"))
-        }
-        req.user = user;
-
-        next()
-
-    } catch (error) {
-        next(HttpError(401, "Not authorized"))
-    }
-}
-
-module.exports = authenticate
+export default authenticate;
