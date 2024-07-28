@@ -18,6 +18,12 @@ export const userSubscriptionSchema = Joi.object({
     .required(),
 });
 
-export const userEmailSchema = Joi.object({
-  email: Joi.string().pattern(EMAIL_REGEXP).required(),
+// export const userEmailSchema = Joi.object({
+//   email: Joi.string().pattern(EMAIL_REGEXP).required(),
+// })
+
+export const resendVerificationEmailSchema = Joi.object({
+  email: Joi.string().required().email().messages({
+    'any.required': 'missing required field email',
+  }),
 });

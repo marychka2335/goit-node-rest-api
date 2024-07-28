@@ -46,6 +46,10 @@ const login = async (req, res) => {
     throw HttpError(401, "Invalid email or password");
   }
 
+  if (!user.verify) {
+    throw HttpError(403, 'Email is not verified');
+  }
+
   const isValidPassword = await compareHash(password, user.password);
   if (!isValidPassword) {
     throw HttpError(401, "Invalid email or password");
@@ -80,24 +84,47 @@ const getCurrent = async (req, res) => {
   });
 };
 
-const verify = async (req, res) => {
-  const { verificationToken } = req.params;
+// const verify = async (req, res) => {
+//   const { verificationToken } = req.params;
 
-  const user = await usersService.findUser({ verificationToken });
+//   const user = await usersService.findUser({ verificationToken });
+
+//   if (!user) {
+//     throw HttpError(404, "User not found");
+//   }
+
+//   await usersService.updateUser(
+//     { _id: user._id },
+//     { verify: true, verificationToken: "N/A" }
+//   );
+
+//   res.status(200).json({
+//     message: "Verification successful",
+//   });
+// };
+
+const verifyUserEmail = controllerWrapper(async (req, res) => {
+  const user = await authServices.findUser({
+    verificationToken: req.params.verificationToken,
+  });
 
   if (!user) {
-    throw HttpError(404, "User not found");
+    throw HttpError(404, 'User not found');
   }
 
-  await usersService.updateUser(
-    { _id: user._id },
-    { verify: true, verificationToken: "N/A" }
-  );
+  if (user.verify) {
+    throw HttpError(400, 'Verification has already been passed');
+  }
 
-  res.json({
-    message: "Verification successful",
+  await usersService.updateUser(user._id, {
+    verificationToken: null,
+    verify: true,
   });
-};
+
+  res.status(200).json({
+    message: 'Verification successful'
+  });
+});
 
 const verifyResend = async (req, res) => {
   const { email } = req.body;
@@ -164,6 +191,7 @@ export default {
   logout: controllerWrapper(logout),
   getCurrent: controllerWrapper(getCurrent),
   verify: controllerWrapper(verify),
+  verifyUserEmail,
   verifyResend: controllerWrapper(verifyResend),
   updateSubscription: controllerWrapper(updateSubscription),
   updateAvatar: controllerWrapper(updateAvatar),
